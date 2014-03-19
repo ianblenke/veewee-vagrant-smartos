@@ -5,6 +5,7 @@
 # ENV['VEEWEE_LOG'] = "debug"
 
 provider = "virtualbox"
+gui = false
 
 Vagrant.require_plugin "vagrant-smartos"
 
@@ -15,7 +16,7 @@ unless File.exist?("#{definition_name}.box")
   puts "smartos.box not found. creating"
   ve = Veewee::Environment.new({ :definition_dir =>  "definitions" })
   box = ve.providers[provider].get_box(definition_name)
-  box.build({'auto' => true,'force' => true, 'nogui' => true, 'disk_count' => 2})
+  box.build({'auto' => true,'force' => true, 'nogui' => !gui, 'disk_count' => 2})
   puts "exporting smartos.box"
   box.export_vagrant(definition_name)
 end
@@ -179,8 +180,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define global_zone do |box|
     box.vm.box = "#{definition_name}.box"
-    box.vm.provider provider do |vm|
-      # This is very virtualbox specific:
+    box.vm.provider provider do |vb|
+      # These are both very virtualbox specific:
+      vb.gui = gui
       vm.customize ["modifyvm", :id, "--memory", "4096"]
     end
   end
