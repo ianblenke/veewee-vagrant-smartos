@@ -5,10 +5,14 @@
 This project uses the gem installed vagrant directly from github:
 
 ```bash
-bundle update
+bundle install
 ```
 
-The vagrant-smartos plugin is used to create the guest vagrant zone:
+The vagrant-smartos plugin is used to create the guest vagrant zone.
+
+https://github.com/joshado/vagrant-smartos
+
+The bundle update above should have already installed this plugin.
 
 ```bash
 bundle exec vagrant plugin install --plugin-prerelease --plugin-source https://rubygems.org/ vagrant-smartos
@@ -16,7 +20,7 @@ bundle exec vagrant plugin install --plugin-prerelease --plugin-source https://r
 
 # Using
 
-Yes, it is this deceptively simple:
+Yes, it should be this deceptively simple:
 
 ```
 bundle exec vagrant up

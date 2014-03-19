@@ -4,6 +4,8 @@
 ## To enable debugging, uncomment this line:
 # ENV['VEEWEE_LOG'] = "debug"
 
+provider = "virtualbox"
+
 Vagrant.require_plugin "vagrant-smartos"
 
 # Prepare the "smartos" box using veewee
@@ -12,7 +14,7 @@ unless File.exist?("#{definition_name}.box")
   require 'veewee'
   puts "smartos.box not found. creating"
   ve = Veewee::Environment.new({ :definition_dir =>  "definitions" })
-  box = ve.providers["virtualbox"].get_box(definition_name)
+  box = ve.providers[provider].get_box(definition_name)
   box.build({'auto' => true,'force' => true, 'nogui' => true, 'disk_count' => 2})
   puts "exporting smartos.box"
   box.export_vagrant(definition_name)
@@ -177,9 +179,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define global_zone do |box|
     box.vm.box = "#{definition_name}.box"
-    box.vm.provider :virtualbox do |vb|
-      vb.gui = true
-      vb.customize ["modifyvm", :id, "--memory", "4096"]
+    box.vm.provider provider do |vm|
+      # This is very virtualbox specific:
+      vm.customize ["modifyvm", :id, "--memory", "4096"]
     end
   end
 

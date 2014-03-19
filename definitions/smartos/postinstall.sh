@@ -14,20 +14,6 @@ PrepareBootScript() {
   cat <<BOOT > /opt/custom/bin/vagrant
 #!/bin/bash
 
-echo "Waiting on svc:/system/filesystem/smartdc:default."
-while ! svcs svc:/system/filesystem/smartdc:default | grep ^online > /dev/null ;do
-  echo -n "."
-  sleep 1
-done
-echo ""
-
-mkdir -p /root/.ssh
-
-# curl -k https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub > /root/.ssh/authorized_keys
-cat <<EOH > /root/.ssh/authorized_keys
-ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
-EOH
-
 echo "Waiting on svc:/network/physical:default."
 while ! svcs svc:/network/physical:default | grep ^online > /dev/null ;do
   echo -n "."
@@ -35,9 +21,22 @@ while ! svcs svc:/network/physical:default | grep ^online > /dev/null ;do
 done
 echo ""
 
+while ! svcs svc:/system/filesystem/smartdc:default | grep ^online > /dev/null ;do
+  sleep 1
+done
+
+export PATH=/opt/local/bin:/opt/local/sbin:/usr/bin:/usr/sbin
+
 pkgin -y update
 pkgin -y install sudo gsasl
 ln -sf /usr/lib/libsasl.so.1 /opt/local/lib/libsasl2.so.3
+
+mkdir -p /root/.ssh
+
+# curl -k https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub > /root/.ssh/authorized_keys
+cat <<EOH > /root/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+EOH
 
 mkdir /mnt-vboxguest
 mount -r -F hsfs /dev/dsk/c1t0d0s2 /mnt-vboxguest
@@ -50,6 +49,7 @@ cp \$REL/opt/VirtualBoxAdditions/amd64/vboxfs      /kernel/fs/amd64/
 cp \$REL/opt/VirtualBoxAdditions/amd64/vboxfsmount /opt/vagrant/bin
 cp \$REL/usr/kernel/drv/amd64/vboxguest            /kernel/drv/amd64/
 cp \$REL/usr/kernel/drv/vboxguest.conf             /kernel/drv/
+
 rm -fr /tmp/SUNWvboxguest
 umount /mnt-vboxguest
 
